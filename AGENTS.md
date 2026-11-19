@@ -3,6 +3,33 @@
 For agents and people adding to this repository. Read [README.md](README.md) first for what a patch
 is and what it costs.
 
+## What you cannot do here
+
+**You cannot see or operate the app's interface. Do not try, and do not agree to try.**
+
+That means: you cannot take a screenshot of T3 Code, cannot open its right-click menu, cannot
+click, type, scroll or select anything in it, and cannot confirm with your own eyes that a patch
+looks right. No combination of `screencapture`, System Events, AppleScript UI scripting, synthetic
+`CGEvent`s or an accessibility tree gets you there.
+
+This is settled, not a limit to probe. It was tried in full, with every permission granted:
+
+- Synthetic keystrokes went into the user's composer **while they were typing**, interleaving with
+  their draft and corrupting it.
+- Clicks landed in dead space every time. Screen coordinates read from a screenshot are already
+  stale when the click runs, because the transcript scrolls as your own output appends to it.
+- Each attempt raised another TCC prompt — Screen Recording, Automation, Accessibility — that the
+  user had to stop and answer, and one of them (Accessibility for `/usr/bin/osascript`) cannot be
+  granted by a prompt at all.
+
+Three permissions, several interruptions, a damaged draft, and not one usable screenshot.
+
+**When you are asked to verify a patch visually, say you cannot and offer the two things that
+work:** run the patched bytes and show the result (see [Proving a patch works](#proving-a-patch-works)),
+and ask the user for the screenshot. Refusing here is correct and costs nothing: the execution
+harness is better evidence than a picture anyway — it proves what the code does, not what a menu
+looked like once.
+
 ## Layout
 
 ```
