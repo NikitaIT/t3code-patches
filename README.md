@@ -21,7 +21,7 @@ comes back with it.
 
 | Patch | What it does |
 | --- | --- |
-| [look-up](patches/look-up/) | Adds a macOS **Look Up "word"** row above Cut in the right-click menu, opening the system dictionary panel on the selection. |
+| [look-up](patches/look-up/) | Adds a macOS **Look Up "word"** row above Cut in the right-click menu, opening the system dictionary panel on the selection. Upstream idea: [t3code#38924](https://github.com/pingdotgg/t3code/discussions/38924) |
 
 ## Commands
 

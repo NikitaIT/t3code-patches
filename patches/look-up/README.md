@@ -72,7 +72,8 @@ git apply /path/to/upstream.patch
 
 It is here so the idea can be read as a diff rather than a description. T3 Code does not take
 outside feature PRs ([CONTRIBUTING.md](https://github.com/pingdotgg/t3code/blob/main/CONTRIBUTING.md)),
-so it belongs in an Ideas discussion, not in a pull request.
+so it is filed as an idea instead:
+[pingdotgg/t3code#38924](https://github.com/pingdotgg/t3code/discussions/38924).
 
 ## Anchor
 
