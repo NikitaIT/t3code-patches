@@ -1,0 +1,23 @@
+--- a/apps/desktop/src/window/DesktopWindow.ts
++++ b/apps/desktop/src/window/DesktopWindow.ts
+@@ -714,6 +714,20 @@
+             },
+           });
+           menuTemplate.push({ type: "separator" });
++        }
++
++        if (environment.platform === "darwin" && params.selectionText.trim()) {
++          const term = params.selectionText.split(/\s+/).join(" ").trim();
++          const shown = term.length > 24 ? `${term.slice(0, 24).trim()}…` : term;
++          menuTemplate.push(
++            {
++              label: m(msg("Look Up “{term}”", { term: shown })),
++              click: () => {
++                if (!contents.isDestroyed()) contents.showDefinitionForSelection();
++              },
++            },
++            { type: "separator" },
++          );
+         }
+ 
+         menuTemplate.push(

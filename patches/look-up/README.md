@@ -58,6 +58,22 @@ The slack comes from the handler's own indentation, between `const menuTemplate 
 - **macOS only.** `showDefinitionForSelection` exists nowhere else.
 - The label shows the first 24 characters of the selection, whitespace collapsed.
 
+## The same change upstream
+
+[upstream.patch](upstream.patch) is this change written against T3 Code's own source, in its own
+idiom: `apps/desktop/src/window/DesktopWindow.ts`, in the `installContextMenu` handler, with the
+label going through `m(msg(...))` so it can be translated and the whole block behind
+`environment.platform === "darwin"`.
+
+```sh
+gh repo clone pingdotgg/t3code && cd t3code
+git apply /path/to/upstream.patch
+```
+
+It is here so the idea can be read as a diff rather than a description. T3 Code does not take
+outside feature PRs ([CONTRIBUTING.md](https://github.com/pingdotgg/t3code/blob/main/CONTRIBUTING.md)),
+so it belongs in an Ideas discussion, not in a pull request.
+
 ## Anchor
 
 `place()` finds `menuTemplate.push({ role: "cut"` by regular expression and walks back to
