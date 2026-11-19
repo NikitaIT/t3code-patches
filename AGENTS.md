@@ -105,11 +105,28 @@ rm -rf "$S/state"
 
 A patch ships only after all of that passes and you have seen it work in the running app.
 
-## The patch's README
+## Proving a patch works
 
-`patches/<id>/README.md` carries: what it changes, a **before** and an **after** screenshot of the
-real app, the code that is injected, where it goes and why there, how to run it, and anything it
-does not do. Screenshots are the evidence that the patch works; a passing `apply` is not.
+A passing `apply` proves nothing: it only says bytes were written. Prove the behaviour by running
+the patched bytes. The menu-building block in `main.cjs` is self-contained, so it can be pulled
+out of the live archive and executed with stubs:
+
+```js
+const { locate, read } = require('./lib/asar')
+const src = read(locate(app, '/apps/desktop/dist-electron/main.cjs'))
+const block = src.slice(src.indexOf('const menuTemplate = [];'), src.indexOf('runPromise(electronMenu.popupTemplate'))
+const build = new Function('params', 'contents', /* …the block's other free names… */, `${block}\nreturn menuTemplate`)
+```
+
+Calling it with a fake `params` and `contents` gives the menu the real app would build, so you can
+assert the row's label, its position, and what its `click` calls. That is evidence, it needs no
+permissions, and it runs in a second.
+
+Screenshots are for the README, not for verification — and they come from the user. Ask for one.
+
+`patches/<id>/README.md` carries: what it changes, before and after screenshots of the real app,
+the code that is injected, where it goes and why there, how to run it, and anything it does not
+do.
 
 ## Restarting the app, for an agent
 
@@ -132,9 +149,11 @@ Rules learned the hard way, do not repeat these:
 - **`pgrep -f` cannot see the app's main process.** Its hardened runtime keeps argv unreadable, so
   only the helper processes match and a wait loop exits immediately. Ask AppleScript instead:
   `osascript -e 'application "T3 Code (Beta)" is running'`.
-- **Do not reach for screenshots or UI scripting to verify a patch.** `screencapture` wants Screen
-  Recording and System Events wants Automation; both raise a permission prompt on the user's
-  machine. Ask the user for the screenshot, or verify in code.
+- **Never drive the GUI.** No synthetic clicks, no keystrokes, no `screencapture`, no System
+  Events. It does not work and it does damage: keystrokes land in whatever the user is typing
+  into, and screen coordinates are stale by the time the click runs, because the transcript
+  scrolls while you work. Each attempt also raises a TCC prompt (Screen Recording, Automation,
+  Accessibility) that the user has to answer.
 
 ## Conventions
 
