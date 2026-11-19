@@ -14,7 +14,12 @@ Quit T3 Code and open it again, select some text, right-click.
 
 | Before | After |
 | --- | --- |
-| ![The menu without Look Up](before.png) | _added in the next commit: the row in the running app_ |
+| ![The right-click menu without Look Up](before.png) | ![The same menu with Look Up “refutation” first](after.png) |
+
+Picking the row opens the macOS Look Up panel over the word, reading whatever dictionaries you
+have turned on — here English plus Russian–English:
+
+![The macOS dictionary panel over the word refutation](panel.png)
 
 ## What it changes
 
