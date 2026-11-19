@@ -94,6 +94,12 @@ overhauls (extensions, plugins, new connection methods)" among them. Feature req
 their [Ideas discussions](https://github.com/pingdotgg/t3code/discussions/categories/ideas). This
 repository is for the meantime: run what you want on your own machine, and keep it reversible.
 
+Where a patch has been proposed upstream, its idea is linked here:
+
+| Patch | Idea |
+| --- | --- |
+| look-up | [pingdotgg/t3code#38924 — macOS: add Look Up to the right-click menu](https://github.com/pingdotgg/t3code/discussions/38924) |
+
 ## Writing another patch
 
 See [AGENTS.md](AGENTS.md) — the patch contract, how to find an anchor that lasts, how much slack a

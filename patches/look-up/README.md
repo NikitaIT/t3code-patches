@@ -4,6 +4,10 @@ Adds a **Look Up "word"** row to T3 Code's right-click menu, above Cut, shown on
 selected. It opens the macOS dictionary panel on the selection — the same Look Up the rest of the
 system shows, not a detour through Dictionary.app.
 
+Proposed upstream as
+[pingdotgg/t3code#38924](https://github.com/pingdotgg/t3code/discussions/38924), with the diff in
+[upstream.patch](upstream.patch).
+
 ```sh
 ./patch apply look-up
 ```
