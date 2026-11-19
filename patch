@@ -8,6 +8,7 @@
 //   ./patch undo look-up             take it back out
 //   ./patch files markdown           search the app's archive by path
 //   ./patch extract <path> [out]     write one of its files out to read
+//   ./patch restart                  quit the app and open it again, once
 //
 // Every command takes --app <path to .app> to work on a bundle that is not
 // the installed one.
@@ -17,6 +18,7 @@ const path = require('node:path')
 
 const { PatchError, fail, findApp, list: listFiles, locate, read } = require('./lib/asar')
 const { apply, find, load, status, undo, STATE } = require('./lib/engine')
+const { restart } = require('./lib/restart')
 
 const argv = process.argv.slice(2)
 
@@ -40,6 +42,7 @@ const usage = `usage: patch <command> [name] [--app <path to .app>]
   undo <name|--all>        take it back out
   files [text]             list the app archive's files, filtered by text
   extract <path> [out]     write one file of the archive out to read
+  restart [--delay 3]      quit the app and open it again, so a patch takes effect
 
 state is remembered in ${STATE}`
 
@@ -81,6 +84,17 @@ const main = () => {
       if (!file.path.includes(needle)) continue
       console.log(`${String(file.size).padStart(10)}  ${file.path}${file.unpacked ? '  (unpacked)' : ''}`)
     }
+
+    return
+  }
+
+  if (command === 'restart') {
+    const delay = Number(option('delay') ?? 3)
+    const pid = restart(app, { delay })
+    console.log(
+      `${path.basename(app)} quits in ${delay}s and comes back (helper pid ${pid}).\n` +
+        'Anything running inside it — this shell, an agent session — ends with it.',
+    )
 
     return
   }

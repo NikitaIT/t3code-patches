@@ -111,6 +111,31 @@ A patch ships only after all of that passes and you have seen it work in the run
 real app, the code that is injected, where it goes and why there, how to run it, and anything it
 does not do. Screenshots are the evidence that the patch works; a passing `apply` is not.
 
+## Restarting the app, for an agent
+
+A patch only takes effect when the Electron main process reads `app.asar` again. If you are an
+agent running inside a T3 Code session, quitting the app kills you — so hand the restart to a
+process that outlives you, which is what `./patch restart` does:
+
+```sh
+./patch restart --delay 5
+```
+
+Say what is about to happen before you run it: the user's session ends with the app and returns
+when it reopens.
+
+Rules learned the hard way, do not repeat these:
+
+- **Never `launchctl submit`.** It defaults to `KeepAlive`, so launchd reruns the script forever —
+  the app quits and reopens every few seconds, and the session that scheduled it is gone. Recovery
+  is `launchctl remove <label>`. A detached one-shot is what you want, never a job.
+- **`pgrep -f` cannot see the app's main process.** Its hardened runtime keeps argv unreadable, so
+  only the helper processes match and a wait loop exits immediately. Ask AppleScript instead:
+  `osascript -e 'application "T3 Code (Beta)" is running'`.
+- **Do not reach for screenshots or UI scripting to verify a patch.** `screencapture` wants Screen
+  Recording and System Events wants Automation; both raise a permission prompt on the user's
+  machine. Ask the user for the screenshot, or verify in code.
+
 ## Conventions
 
 - Quit and reopen T3 Code to see a patch: the main process reads `app.asar` at startup.

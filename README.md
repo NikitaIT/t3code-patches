@@ -13,6 +13,9 @@ cd t3code-patches
 ```
 
 Then quit T3 Code and open it again — the Electron main process reads `app.asar` at startup.
+`./patch restart` does that for you, from a process that outlives the app, so it also works when
+you run it from a shell or an agent session **inside** T3 Code: that session ends with the app and
+comes back with it.
 
 ## Patches
 
@@ -28,12 +31,29 @@ Then quit T3 Code and open it again — the Electron main process reads `app.asa
 ./patch undo look-up             # take it back out
 ./patch files markdown           # search the app archive's file paths
 ./patch extract /apps/desktop/dist-electron/main.cjs   # write a file out to read
+./patch restart                  # quit the app and open it again, once
 ```
 
 Every command takes `--app "/path/to/T3 Code.app"` to work on a bundle other than the installed one.
 That is how you test a patch against a copy before touching the app you use.
 
 Requirements: macOS, Node 18 or newer, and no other dependencies.
+
+## Restarting the app
+
+```sh
+./patch restart            # 3 seconds, then quit and reopen
+./patch restart --delay 10
+```
+
+It spawns one detached `/bin/bash` (`spawn(..., { detached: true })` plus `unref`), which sleeps,
+asks the app to quit the way the Quit menu item does, waits for it to actually go, and opens it
+again. One run, nothing installed, nothing scheduled.
+
+**Do not use `launchctl submit` for this.** Jobs submitted that way default to `KeepAlive`, so
+launchd runs the script again every time it exits: the app quits and reopens in a loop, and the
+session that started it is already dead and cannot stop it. If you ever end up in that loop,
+`launchctl remove <label>` is the way out.
 
 ## How it works
 
