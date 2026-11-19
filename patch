@@ -1,0 +1,109 @@
+#!/usr/bin/env node
+'use strict'
+
+// patch — apply, undo and inspect the patches in this repository.
+//
+//   ./patch list                     what is here and what is applied
+//   ./patch apply look-up            apply one, or --all for every patch
+//   ./patch undo look-up             take it back out
+//   ./patch files markdown           search the app's archive by path
+//   ./patch extract <path> [out]     write one of its files out to read
+//
+// Every command takes --app <path to .app> to work on a bundle that is not
+// the installed one.
+
+const fs = require('node:fs')
+const path = require('node:path')
+
+const { PatchError, fail, findApp, list: listFiles, locate, read } = require('./lib/asar')
+const { apply, find, load, status, undo, STATE } = require('./lib/engine')
+
+const argv = process.argv.slice(2)
+
+const option = name => {
+  const at = argv.indexOf(`--${name}`)
+
+  return at === -1 ? undefined : argv[at + 1]
+}
+
+const words = argv.filter((one, index) => {
+  if (one.startsWith('--')) return false
+
+  return argv[index - 1] !== '--app'
+})
+
+const usage = `usage: patch <command> [name] [--app <path to .app>]
+
+  list                     every patch here, and whether it is applied
+  status [name]            the same, for one patch
+  apply <name|--all>       put the patch into the app
+  undo <name|--all>        take it back out
+  files [text]             list the app archive's files, filtered by text
+  extract <path> [out]     write one file of the archive out to read
+
+state is remembered in ${STATE}`
+
+const chosen = patches => {
+  if (argv.includes('--all')) return patches
+  const [, ...names] = words
+
+  return names.length === 0 ? patches : names.map(find)
+}
+
+const main = () => {
+  const command = words[0] ?? 'list'
+  const app = findApp(option('app'))
+
+  if (command === 'list' || command === 'status') {
+    const rows = chosen(load()).map(patch => status(patch, app))
+    console.log(app)
+    for (const row of rows) {
+      console.log(`  ${row.applied ? '[on] ' : '[   ]'} ${row.id.padEnd(16)} ${row.title}`)
+    }
+    if (rows.length === 0) console.log('  (no patches in patches/)')
+
+    return
+  }
+
+  if (command === 'apply' || command === 'undo') {
+    const patches = chosen(load())
+    if (patches.length === 0) fail('name a patch, or pass --all')
+    for (const patch of patches) {
+      console.log((command === 'apply' ? apply : undo)(patch, app))
+    }
+
+    return
+  }
+
+  if (command === 'files') {
+    const needle = words[1] ?? ''
+    for (const file of listFiles(path.join(app, 'Contents/Resources/app.asar'))) {
+      if (!file.path.includes(needle)) continue
+      console.log(`${String(file.size).padStart(10)}  ${file.path}${file.unpacked ? '  (unpacked)' : ''}`)
+    }
+
+    return
+  }
+
+  if (command === 'extract') {
+    const file = words[1]
+    if (!file) throw new PatchError('extract needs a path inside the archive')
+    const out = words[2] ?? path.basename(file)
+    fs.writeFileSync(out, read(locate(app, file)))
+    console.log(`wrote ${out}`)
+
+    return
+  }
+
+  console.log(usage)
+  process.exitCode = 1
+}
+
+try {
+  if (process.platform !== 'darwin') throw new PatchError('these patches are for the macOS app')
+  main()
+} catch (error) {
+  if (!(error instanceof PatchError)) throw error
+  console.error(`patch: ${error.message}`)
+  process.exitCode = 1
+}
